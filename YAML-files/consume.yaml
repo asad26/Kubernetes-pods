@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: consumer-kafka
+spec:
+  replicas: 1
+  selector:
+    kafka: consumer
+  template:
+    metadata:
+      labels:
+        kafka: consumer
+    spec:
+      hostNetwork: true
+      containers:
+        - image: asad26/rpi-kafka-consume:version2
+          name: kafka-consumer
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - /consumer-save.sh
+      restartPolicy: Always
+      #nodeSelector:
+        #name: rpi-node-1

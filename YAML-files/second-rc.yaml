@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: second-kafka
+spec:
+  replicas: 1
+  selector:
+    kafka: second
+  template:
+    metadata:
+      labels:
+        kafka: second
+    spec:
+      hostNetwork: true
+      containers:
+        - image: asad26/rpi-zookeeper:version4
+          name: zookeeper-2
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - /zk-start.sh 2
+          ports:
+            - containerPort: 2181
+              #hostPort: 2181
+              name: clientport
+        - image: asad26/rpi-kafka9-final:version7
+          name: kafka-broker-2
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - /2kafka-start.sh 2
+          ports:
+            - containerPort: 9092
+              #hostPort: 9092
+              name: brokerport
+          volumeMounts:
+            - name: motionpics
+              mountPath: /camera2
+      restartPolicy: Always
+      nodeSelector:
+        name: rpi-master-2
+      volumes:
+        - hostPath:
+            path: /mnt/camera2
+          name: motionpics

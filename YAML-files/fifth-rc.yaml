@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: fifth-kafka
+spec:
+  replicas: 1
+  selector:
+    kafka: fifth
+  template:
+    metadata:
+      labels:
+        kafka: fifth
+    spec:
+      hostNetwork: true
+      containers:
+        - image: asad26/rpi-zookeeper:version4
+          name: zookeeper-5
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - /zk-start.sh 5
+          ports:
+            - containerPort: 2181
+              #hostPort: 2181
+              name: clientport
+        - image: asad26/rpi-kafka9-final:version7
+          name: kafka-broker-5
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - /5kafka-start.sh 5
+          ports:
+            - containerPort: 9092
+              #hostPort: 9092
+              name: brokerport
+          volumeMounts:
+            - name: motionpics
+              mountPath: /camera5
+      restartPolicy: Always
+      nodeSelector:
+        name: rpi-node-2
+      volumes:
+        - hostPath:
+            path: /mnt/camera5
+          name: motionpics
